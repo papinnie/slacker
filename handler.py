@@ -25,7 +25,7 @@ class MessageHandler(Message):
         options = self.process_rules(message)
 
         print('matched', options)
-        self.send_to_slack(self.extract_text(message), **options)
+        self.send_to_slack(self.extract_text(message, options), **options)
 
         if options['debug']:
             self.send_to_slack('DEBUG: ' + str(message), **options)
@@ -58,10 +58,16 @@ class MessageHandler(Message):
 
         return default
 
-    def extract_text(self, message):
+    def extract_text(self, message, options):
         fmt = self.config['default'].get('format', '%(body)s')
         body = message.get_payload()
         subject = message['Subject']
+
+        # body replace
+        if 'exclude' in options:
+            for regexp in options['exclude']:
+                body = re.sub(regexp, '', body)
+
         return fmt % dict(body=body, subject=subject)
 
     def send_to_slack(self, text, **options):

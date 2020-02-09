@@ -40,3 +40,5 @@ rules:
           icon_url: ''
           debug: true  ## will output full email with all headers
           format: "email body is: %(body)s"  ## custom message format
+          exclude:
+              - '^ *Dear Sir/Madam, *[\r\n]+' ## Regular expression to remove from message body
