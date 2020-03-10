@@ -19,7 +19,7 @@ class MessageHandler(Message):
 
         # load processor.py
         # and body is processed by a processor() function
-        self.processor = lambda x: return x
+        self.processor = lambda x: x
         processor = importlib.util.find_spec("processor")
         if processor:
             processor_module = importlib.util.module_from_spec(processor)
