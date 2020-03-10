@@ -3,6 +3,7 @@ import re
 import yaml
 import slack
 import slack.chat
+import importlib
 from aiosmtpd.handlers import Message
 
 
@@ -15,6 +16,15 @@ class MessageHandler(Message):
         if not os.path.exists(config):
             print('Config doesn\'t exists!')
             exit(1)
+
+        # load processor.py
+        # and body is processed by a processor() function
+        self.processor = lambda x: x
+        processor = importlib.util.find_spec("processor")
+        if processor:
+            processor_module = importlib.util.module_from_spec(processor)
+            processor.loader.exec_module(processor_module)
+            self.processor = processor_module.processor
 
         self.config = yaml.load(open(config))
 
@@ -67,6 +77,9 @@ class MessageHandler(Message):
         if 'exclude' in options:
             for regexp in options['exclude']:
                 body = re.sub(regexp, '', body)
+
+        # body customized processor
+        body = self.processor(body)
 
         return fmt % dict(body=body, subject=subject)
 
